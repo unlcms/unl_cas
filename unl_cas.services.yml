@@ -1,0 +1,5 @@
+services:
+  my_event_subscriber:
+    class: '\Drupal\unl_cas\EventSubscriber\MyEventSubscriber'
+    tags:
+      - { name: 'event_subscriber' }

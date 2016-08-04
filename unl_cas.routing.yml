@@ -1,0 +1,31 @@
+unl_cas.content:
+  path: '/examplecas'
+  defaults:
+    _controller: '\Drupal\unl_cas\Controller\UnlCasController::content'
+    _title: 'Hello World'
+  requirements:
+    _permission: 'access content'
+
+unl_cas.admin:
+  path: '/admin/people/import'
+  defaults:
+    _form: '\Drupal\unl_cas\Form\UserImport'
+    _title: 'Import User from UNL Directory'
+  requirements:
+    _permission: 'administer users'
+
+unl_cas.settings:
+  path: '/admin/config/people/unl_cas'
+  defaults:
+    _form: '\Drupal\unl_cas\Form\SettingsForm'
+    _title: 'Configure the UNL CAS module'
+  requirements:
+    _permission: 'administer site configuration'
+
+unl_cas.validate_ticket:
+  path: '/user/cas'
+  defaults:
+    _controller: '\Drupal\unl_cas\UnlCas::validateTicket'
+    _title: 'UNL CAS Validation'
+  requirements:
+    _permission: 'access content'

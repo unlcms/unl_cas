@@ -1,0 +1,9 @@
+name: 'UNL CAS'
+description: 'Enables CAS authentication/registration of users through login.unl.edu.'
+package: UNL
+
+type: module
+core: 8.x
+
+version: 1.x
+configure: unl_cas.settings
