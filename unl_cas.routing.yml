@@ -25,7 +25,7 @@ unl_cas.settings:
 unl_cas.validate_ticket:
   path: '/user/cas'
   defaults:
-    _controller: '\Drupal\unl_cas\UnlCas::validateTicket'
+    _controller: '\Drupal\unl_cas\Controller\UnlCasController::validateTicket'
     _title: 'UNL CAS Validation'
   requirements:
     _permission: 'access content'

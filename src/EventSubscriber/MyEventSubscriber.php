@@ -2,7 +2,7 @@
 
 namespace Drupal\unl_cas\EventSubscriber;
 
-use Drupal\unl_cas\UnlCas;
+use Drupal\unl_cas\Controller\UnlCasController;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -29,7 +29,7 @@ class MyEventSubscriber implements EventSubscriberInterface {
     // If the user's CAS service ticket is expired, and their drupal session hasn't,
     // redirect their next GET request to CAS to keep their CAS session active.
     // However, if their drupal session expired (and they're now anonymous), redirect them regardless.
-    $cas = UnlCas::getAdapter();
+    $cas = UnlCasController::getAdapter();
     if ($cas->isTicketExpired() && ($_SERVER['REQUEST_METHOD'] == 'GET' || user_is_anonymous())) {
       $cas->setGateway();
       unset($_GET['destination']);

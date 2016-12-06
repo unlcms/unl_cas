@@ -1,1 +1,10 @@
 <?php
+
+/**
+ * Implements hook_install().
+ */
+function unl_cas_install() {
+  \Drupal::configFactory()->getEditable('user.settings')
+      ->set('register', USER_REGISTER_ADMINISTRATORS_ONLY)
+      ->save(TRUE);
+}
