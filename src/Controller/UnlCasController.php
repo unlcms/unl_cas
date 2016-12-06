@@ -3,10 +3,11 @@
 namespace Drupal\unl_cas\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 
 class UnlCasController extends ControllerBase {
 
-  static $adapter;
+  public $adapter;
 
   static $zendLoaded = FALSE;
 
@@ -18,7 +19,7 @@ class UnlCasController extends ControllerBase {
     return $build;
   }
 
-  static function unl_load_zend_framework() {
+  public function unl_load_zend_framework() {
     if (UnlCasController::$zendLoaded) {
       return;
     }
@@ -30,30 +31,31 @@ class UnlCasController extends ControllerBase {
     UnlCasController::$zendLoaded = TRUE;
   }
 
-  static function getAdapter() {
-    UnlCasController::unl_load_zend_framework();
+  public function getAdapter() {
+    $this->unl_load_zend_framework();
 
     // Start the session because if drupal doesn't then Zend_Session will.
-    drupal_session_start();
-    if (!UnlCasController::$adapter) {
-      if (variable_get('https', FALSE)) {
-        $url = url('user/cas', array('absolute' => TRUE, 'query' => drupal_get_destination(), 'https' => TRUE));
+    $session = \Drupal::service('session');
+    $session->start();
+
+    if (!$this->adapter) {
+      if (!\Drupal::request()->isSecure()) {
+        $url = Url::fromRoute('unl_cas.validate_ticket', array(), array('absolute'=>TRUE, 'https'=>TRUE))->toString();
       } else {
-        $url = url('user/cas', array('absolute' => TRUE, 'query' => drupal_get_destination()));
+        $url = Url::fromRoute('unl_cas.validate_ticket', array(), array('absolute'=>TRUE))->toString();
       }
-      $this->adapter = new Unl_Cas($url, 'https://login.unl.edu/cas');
+      $this->adapter = new \Unl_Cas($url, 'https://login.unl.edu/cas');
     }
     return $this->adapter;
   }
 
-  static function validateTicket() {
-    $cas = UnlCasController::getAdapter();
+  public function validateTicket() {
 
     if (array_key_exists('logoutRequest', $_POST)) {
-      $cas->handleLogoutRequest($_POST['logoutRequest']);
+      $this->adapter->handleLogoutRequest($_POST['logoutRequest']);
     }
 
-    $auth = $cas->validateTicket();
+    $auth = $this->adapter->validateTicket();
 
     if ($auth) {
       $username = $cas->getUsername();

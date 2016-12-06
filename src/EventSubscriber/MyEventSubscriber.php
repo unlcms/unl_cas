@@ -3,6 +3,7 @@
 namespace Drupal\unl_cas\EventSubscriber;
 
 use Drupal\unl_cas\Controller\UnlCasController;
+use Drupal\Core\Routing\TrustedRedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -11,6 +12,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * Event Subscriber MyEventSubscriber.
  */
 class MyEventSubscriber implements EventSubscriberInterface {
+
+  protected $cas;
 
   /**
    * Code that should be triggered on event specified
@@ -29,11 +32,11 @@ class MyEventSubscriber implements EventSubscriberInterface {
     // If the user's CAS service ticket is expired, and their drupal session hasn't,
     // redirect their next GET request to CAS to keep their CAS session active.
     // However, if their drupal session expired (and they're now anonymous), redirect them regardless.
-    $cas = UnlCasController::getAdapter();
-    if ($cas->isTicketExpired() && ($_SERVER['REQUEST_METHOD'] == 'GET' || user_is_anonymous())) {
-      $cas->setGateway();
+    $this->cas = (new UnlCasController())->getAdapter();
+    if ($this->cas->isTicketExpired() && ($_SERVER['REQUEST_METHOD'] == 'GET' || \Drupal::currentUser()->isAnonymous())) {
+      $this->cas->setGateway();
       unset($_GET['destination']);
-      drupal_goto($cas->getLoginUrl());
+      $event->setResponse(TrustedRedirectResponse::create($this->cas->getLoginUrl(), 302));
     }
   }
 
