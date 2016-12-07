@@ -25,7 +25,7 @@ class MyEventSubscriber implements EventSubscriberInterface {
     }
 
     // The current request is to the validation URL, we don't want to redirect while a login is pending.
-    if (\Drupal::service('path.current')->getPath() == 'user/cas') {
+    if (\Drupal::service('path.current')->getPath() == '/user/cas') {
       return;
     }
 

@@ -39,7 +39,7 @@ class UnlCasController extends ControllerBase {
     $session->start();
 
     if (!$this->adapter) {
-      if (!\Drupal::request()->isSecure()) {
+      if (\Drupal::request()->isSecure()) {
         $url = Url::fromRoute('unl_cas.validate_ticket', array(), array('absolute'=>TRUE, 'https'=>TRUE))->toString();
       } else {
         $url = Url::fromRoute('unl_cas.validate_ticket', array(), array('absolute'=>TRUE))->toString();
