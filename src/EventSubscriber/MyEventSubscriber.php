@@ -24,9 +24,15 @@ class MyEventSubscriber implements EventSubscriberInterface {
       return;
     }
 
+    $current_path = \Drupal::service('path.current')->getPath();
+
     // The current request is to the validation URL, we don't want to redirect while a login is pending.
-    if (\Drupal::service('path.current')->getPath() == '/user/cas') {
+    if ($current_path == '/user/cas') {
       return;
+    }
+
+    if ($current_path == '/user/login') {
+      $event->setResponse(TrustedRedirectResponse::create($this->cas->getLoginUrl(), 302));
     }
 
     // If the user's CAS service ticket is expired, and their drupal session hasn't,

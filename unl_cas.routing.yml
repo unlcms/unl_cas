@@ -22,10 +22,8 @@ unl_cas.settings:
   requirements:
     _permission: 'administer site configuration'
 
-unl_cas.validate_ticket:
+unl_cas.validate:
   path: '/user/cas'
   defaults:
-    _controller: '\Drupal\unl_cas\Controller\UnlCasController::validateTicket'
+    _controller: '\Drupal\unl_cas\Controller\UnlCasController::validate'
     _title: 'UNL CAS Validation'
-  requirements:
-    _permission: 'access content'

@@ -3,7 +3,9 @@
 namespace Drupal\unl_cas\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Url;
+use Drupal\user\Entity\User;
 
 class UnlCasController extends ControllerBase {
 
@@ -40,22 +42,23 @@ class UnlCasController extends ControllerBase {
 
     if (!$this->adapter) {
       if (\Drupal::request()->isSecure()) {
-        $url = Url::fromRoute('unl_cas.validate_ticket', array(), array('absolute'=>TRUE, 'https'=>TRUE))->toString();
+        $url = Url::fromRoute('unl_cas.validate', array(), array('absolute'=>TRUE, 'https'=>TRUE))->toString();
       } else {
-        $url = Url::fromRoute('unl_cas.validate_ticket', array(), array('absolute'=>TRUE))->toString();
+        $url = Url::fromRoute('unl_cas.validate', array(), array('absolute'=>TRUE))->toString();
       }
       $this->adapter = new \Unl_Cas($url, 'https://login.unl.edu/cas');
     }
     return $this->adapter;
   }
 
-  public function validateTicket() {
+  public function validate() {
+    $cas = $this->getAdapter();
 
     if (array_key_exists('logoutRequest', $_POST)) {
-      $this->adapter->handleLogoutRequest($_POST['logoutRequest']);
+      $cas->handleLogoutRequest($_POST['logoutRequest']);
     }
 
-    $auth = $this->adapter->validateTicket();
+    $auth = $cas->validateTicket();
 
     if ($auth) {
       $username = $cas->getUsername();
@@ -67,9 +70,12 @@ class UnlCasController extends ControllerBase {
       }
     }
     else {
-      if (!user_is_anonymous()) {
-        $GLOBALS['user'] = drupal_anonymous_user();
-        user_login_finalize();
+      if (!\Drupal::currentUser()->isAnonymous()) {
+        \Drupal::currentUser()->setAccount(new AnonymousUserSession());
+
+        $account = User::load(\Drupal::currentUser()->id());
+        echo \Drupal::currentUser()->id();exit;
+        user_login_finalize($account);
       }
       setcookie('unl_sso', 'fake', time() - 60 * 60 * 24, '/', '.unl.edu');
     }
