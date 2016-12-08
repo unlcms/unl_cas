@@ -6,20 +6,13 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class UnlCasController extends ControllerBase {
 
   public $adapter;
 
   static $zendLoaded = FALSE;
-
-  public function content() {
-    $build = array(
-      '#type' => 'markup',
-      '#markup' => t('Hello World! UNL CAS'),
-    );
-    return $build;
-  }
 
   public function unl_load_zend_framework() {
     if (UnlCasController::$zendLoaded) {
@@ -42,12 +35,15 @@ class UnlCasController extends ControllerBase {
 
     if (!$this->adapter) {
       if (\Drupal::request()->isSecure()) {
-        $url = Url::fromRoute('unl_cas.validate', array(), array('absolute'=>TRUE, 'https'=>TRUE))->toString();
+        $url = Url::fromRoute('unl_cas.validate', array(), array('absolute' => TRUE, 'query' => drupal_get_destination(), 'https' => TRUE))->toString();
       } else {
-        $url = Url::fromRoute('unl_cas.validate', array(), array('absolute'=>TRUE))->toString();
+        $url = Url::fromRoute('unl_cas.validate', array(), array('absolute' => TRUE, 'query' => drupal_get_destination()))->toString();
       }
       $this->adapter = new \Unl_Cas($url, 'https://login.unl.edu/cas');
     }
+
+    \Drupal::request()->query->remove('destination');
+
     return $this->adapter;
   }
 
@@ -62,27 +58,43 @@ class UnlCasController extends ControllerBase {
 
     if ($auth) {
       $username = $cas->getUsername();
-      $user = unl_cas_import_user($username);
+      $user = $this->importUser($username);
 
-      if ($GLOBALS['user']->uid != $user->uid) {
-        $GLOBALS['user'] = $user;
-        user_login_finalize();
+      if (\Drupal::currentUser()->id() != $user->id()) {
+        \Drupal::currentUser()->setAccount($user);
+        user_login_finalize($user);
       }
     }
     else {
       if (!\Drupal::currentUser()->isAnonymous()) {
         \Drupal::currentUser()->setAccount(new AnonymousUserSession());
-
         $account = User::load(\Drupal::currentUser()->id());
-        echo \Drupal::currentUser()->id();exit;
         user_login_finalize($account);
       }
       setcookie('unl_sso', 'fake', time() - 60 * 60 * 24, '/', '.unl.edu');
     }
 
     $destination = drupal_get_destination();
-    unset($_GET['destination']);
-    drupal_goto($destination['destination']);
+    if (!$destination['destination']) {
+      $destination['destination'] = 'admin';
+    }
+    $response = new RedirectResponse(Url::fromUserInput('/'.$destination['destination'])->toString());
+    $response->send();
+    return;
   }
 
+  public function importUser($username) {
+    $username = trim($username);
+    $user = user_load_by_name($username);
+    if (!$user) {
+      $user = \Drupal\user\Entity\User::create();
+      $user->setUsername($username);
+      $user->setEmail($username . '@unl.edu');
+      $user->setPassword('Trump');
+      $user->enforceIsNew();
+      $user->activate();
+    }
+    $user->save();
+    return $user;
+  }
 }

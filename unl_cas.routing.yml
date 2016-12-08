@@ -1,11 +1,3 @@
-unl_cas.content:
-  path: '/examplecas'
-  defaults:
-    _controller: '\Drupal\unl_cas\Controller\UnlCasController::content'
-    _title: 'Hello World'
-  requirements:
-    _permission: 'access content'
-
 unl_cas.admin:
   path: '/admin/people/import'
   defaults:
@@ -27,3 +19,5 @@ unl_cas.validate:
   defaults:
     _controller: '\Drupal\unl_cas\Controller\UnlCasController::validate'
     _title: 'UNL CAS Validation'
+  requirements:
+    _access: 'TRUE'

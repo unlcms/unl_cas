@@ -1,5 +1,5 @@
 services:
-  my_event_subscriber:
-    class: '\Drupal\unl_cas\EventSubscriber\MyEventSubscriber'
+  unL_cas_loader:
+    class: '\Drupal\unl_cas\EventSubscriber\UnlCasLoader'
     tags:
-      - { name: 'event_subscriber' }
+      - { name: event_subscriber }

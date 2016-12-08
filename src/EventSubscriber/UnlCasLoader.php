@@ -9,9 +9,9 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Event Subscriber MyEventSubscriber.
+ * Event Subscriber UnlCasLoader.
  */
-class MyEventSubscriber implements EventSubscriberInterface {
+class UnlCasLoader implements EventSubscriberInterface {
 
   protected $cas;
 
@@ -19,30 +19,35 @@ class MyEventSubscriber implements EventSubscriberInterface {
    * Code that should be triggered on event specified
    */
   public function onRequest(GetResponseEvent $event) {
-    // If no one is claiming to be logged in while no one is actually logged in, we don't need CAS.
-    if (!array_key_exists('unl_sso', $_COOKIE) && \Drupal::currentUser()->isAnonymous()) {
+    // If no one is claiming to be logged in, while no one is actually logged in, and they're not trying to login - we don't need CAS.
+    if (!array_key_exists('unl_sso', $_COOKIE)
+        && \Drupal::currentUser()->isAnonymous()
+        && \Drupal::service('path.current')->getPath() !== '/user/login') {
       return;
     }
-
-    $current_path = \Drupal::service('path.current')->getPath();
 
     // The current request is to the validation URL, we don't want to redirect while a login is pending.
-    if ($current_path == '/user/cas') {
+    if (\Drupal::service('path.current')->getPath() == '/user/cas') {
       return;
     }
 
-    if ($current_path == '/user/login') {
-      $event->setResponse(TrustedRedirectResponse::create($this->cas->getLoginUrl(), 302));
+    $this->cas = (new UnlCasController())->getAdapter();
+
+    // Redirect the login form to CAS.
+    if (\Drupal::service('path.current')->getPath() == '/user/login') {
+      $response = new TrustedRedirectResponse($this->cas->getLoginUrl(), 302);
+      $event->setResponse($response);
+      return;
     }
 
     // If the user's CAS service ticket is expired, and their drupal session hasn't,
     // redirect their next GET request to CAS to keep their CAS session active.
     // However, if their drupal session expired (and they're now anonymous), redirect them regardless.
-    $this->cas = (new UnlCasController())->getAdapter();
     if ($this->cas->isTicketExpired() && ($_SERVER['REQUEST_METHOD'] == 'GET' || \Drupal::currentUser()->isAnonymous())) {
       $this->cas->setGateway();
-      unset($_GET['destination']);
-      $event->setResponse(TrustedRedirectResponse::create($this->cas->getLoginUrl(), 302));
+      \Drupal::request()->query->remove('destination');
+      $response = new TrustedRedirectResponse($this->cas->getLoginUrl(), 302);
+      $event->setResponse($response);
     }
   }
 
