@@ -29,9 +29,21 @@ class UnlCasController extends ControllerBase {
   public function getAdapter() {
     $this->unl_load_zend_framework();
 
-    // Start the session because if drupal doesn't then Zend_Session will.
+
+    /**
+     * @var \Symfony\Component\HttpFoundation\Session\Session $session
+     */
     $session = \Drupal::service('session');
-    $session->start();
+
+    // Start the session because if drupal doesn't then Zend_Session will.
+    if (!$session->isStarted()) {
+      /**
+       * Drupal will start a 'lazy' session for anonymous users so that a cookie is not set (to help with things like varnish)
+       * We can't $session->start(), because it is already lazy-started
+       * Instead we need to migrate it to a stored (non-lazy) session
+       */
+      $session->migrate();
+    }
 
     if (!$this->adapter) {
       if (\Drupal::request()->isSecure()) {
@@ -78,9 +90,9 @@ class UnlCasController extends ControllerBase {
     if (!$destination['destination']) {
       $destination['destination'] = 'admin';
     }
-    $response = new RedirectResponse(Url::fromUserInput('/'.$destination['destination'])->toString());
-    $response->send();
-    return;
+    
+    //The controller expects a response object or a render array
+    return new RedirectResponse(Url::fromUserInput('/'.$destination['destination'])->toString());
   }
 
   public function importUser($username) {
