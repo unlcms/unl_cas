@@ -90,9 +90,9 @@ class UnlCasController extends ControllerBase {
     if (!$destination['destination']) {
       $destination['destination'] = 'admin';
     }
-    $response = new RedirectResponse(Url::fromUserInput('/'.$destination['destination'])->toString());
-    $response->send();
-    return;
+    
+    //The controller expects a response object or a render array
+    return new RedirectResponse(Url::fromUserInput('/'.$destination['destination'])->toString());
   }
 
   public function importUser($username) {
