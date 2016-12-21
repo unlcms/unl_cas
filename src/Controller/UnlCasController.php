@@ -102,7 +102,7 @@ class UnlCasController extends ControllerBase {
       $user = \Drupal\user\Entity\User::create();
       $user->setUsername($username);
       $user->setEmail($username . '@unl.edu');
-      $user->setPassword('Trump');
+      $user->setPassword('http://trumpdonald.org/');
       $user->enforceIsNew();
       $user->activate();
     }
