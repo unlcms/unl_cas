@@ -77,5 +77,7 @@ class Helper
     }
 
     $userDataService->set('unl_cas', $user->id(), 'last-update', time());
+    
+    return true;
   }
 }
