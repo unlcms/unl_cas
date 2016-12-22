@@ -56,11 +56,11 @@ class SettingsForm extends ConfigFormBase {
     //indicate whether or not LDAP is working
     $query = new PersonDataQuery();
     $result = $query->getUserData(\Drupal::currentUser()->getAccountName());
+    $affiliation = \Drupal::service('user.data')->get('unl_cas', \Drupal::currentUser()->id(), 'primaryAffiliation');
 
     if (!$result || $result['data']['unl']['source'] !== PersonDataQuery::SOURCE_LDAP) {
-      drupal_set_message($this->t('LDAP is NOT being used. Please ensure credentials are correct.'), 'warning');
+      drupal_set_message($this->t('LDAP is NOT being used. Please ensure credentials are correct. Your primary affiliation is: @affiliation', ['@affiliation'=>$affiliation]), 'warning');
     } else {
-      $affiliation = \Drupal::service('user.data')->get('unl_cas', \Drupal::currentUser()->id(), 'primaryAffiliation');
       drupal_set_message($this->t('LDAP is being used, your primary affiliation is: @affiliation', ['@affiliation'=>$affiliation]));
     }
     
