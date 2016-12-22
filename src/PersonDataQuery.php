@@ -64,11 +64,15 @@ class PersonDataQuery
     $config = \Drupal::config('unl_cas.settings');
     
     if (empty($config->get('dn'))) {
-      throw new \Exception('the DN is not set, we will be unable to connect to LDAP');
+      throw new \Exception('the LDAP DN is not set, we will be unable to connect to LDAP');
     }
 
     if (empty($config->get('password'))) {
-      throw new \Exception('the password is not set, we will be unable to connect to LDAP');
+      throw new \Exception('the LDAP password is not set, we will be unable to connect to LDAP');
+    }
+
+    if (empty($config->get('uri'))) {
+      throw new \Exception('the LDAP uri is not set, we will be unable to connect to LDAP');
     }
     
     $adapter = new Adapter([
