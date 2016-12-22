@@ -16,6 +16,8 @@ use Drupal\user\Entity\User;
  */
 class UpdateUserDataCron extends QueueWorkerBase
 {
+  
+  protected $processedIds = [];
 
   /**
    * Works on a single queue item.
@@ -47,6 +49,14 @@ class UpdateUserDataCron extends QueueWorkerBase
     if (!isset($data->uid)) {
       return;
     }
+    
+    if (in_array($data->uid, $this->processedIds)) {
+      //We already processed this item during this cron, so skip it.
+      return;
+    }
+    
+    //Save this in the list of processed Ids
+    $this->processedIds[] = $data->uid;
     
     $helper = new Helper();
     $user = User::load($data->uid);
