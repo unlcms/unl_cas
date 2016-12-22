@@ -5,6 +5,7 @@ namespace Drupal\unl_cas\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Url;
+use Drupal\unl_cas\Helper;
 use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -69,8 +70,10 @@ class UnlCasController extends ControllerBase {
     $auth = $cas->validateTicket();
 
     if ($auth) {
+      $helper = new Helper();
+      
       $username = $cas->getUsername();
-      $user = $this->importUser($username);
+      $user = $helper->importUser($username);
 
       if (\Drupal::currentUser()->id() != $user->id()) {
         \Drupal::currentUser()->setAccount($user);
@@ -93,20 +96,5 @@ class UnlCasController extends ControllerBase {
     
     //The controller expects a response object or a render array
     return new RedirectResponse(Url::fromUserInput('/'.$destination['destination'])->toString());
-  }
-
-  public function importUser($username) {
-    $username = trim($username);
-    $user = user_load_by_name($username);
-    if (!$user) {
-      $user = \Drupal\user\Entity\User::create();
-      $user->setUsername($username);
-      $user->setEmail($username . '@unl.edu');
-      $user->setPassword('Trump');
-      $user->enforceIsNew();
-      $user->activate();
-    }
-    $user->save();
-    return $user;
   }
 }

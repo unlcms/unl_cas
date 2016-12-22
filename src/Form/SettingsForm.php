@@ -4,6 +4,7 @@ namespace Drupal\unl_cas\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\unl_cas\PersonDataQuery;
 
 /**
  * Configures unl_cas settings for this site.
@@ -52,6 +53,17 @@ class SettingsForm extends ConfigFormBase {
         '#required' => TRUE,
     );
 
+    //indicate whether or not LDAP is working
+    $query = new PersonDataQuery();
+    $result = $query->getUserData(\Drupal::currentUser()->getAccountName());
+
+    if (!$result || $result['data']['unl']['source'] !== PersonDataQuery::SOURCE_LDAP) {
+      drupal_set_message($this->t('LDAP is NOT being used. Please ensure credentials are correct.'), 'warning');
+    } else {
+      $affiliation = \Drupal::service('user.data')->get('unl_cas', \Drupal::currentUser()->id(), 'primaryAffiliation');
+      drupal_set_message($this->t('LDAP is being used, your primary affiliation is: @affiliation', ['@affiliation'=>$affiliation]));
+    }
+    
     return parent::buildForm($form, $form_state);
   }
 
