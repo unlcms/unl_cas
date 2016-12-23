@@ -8,3 +8,14 @@ function unl_cas_install() {
       ->set('register', USER_REGISTER_ADMINISTRATORS_ONLY)
       ->save(TRUE);
 }
+
+function unl_cas_user_login(\Drupal\Core\Session\AccountInterface $account) {
+  //Schedule a user data update for the account
+  /** @var \Drupal\Core\Queue\QueueFactory $queue_factory */
+  $queue_factory = \Drupal::service('queue');
+  /** @var \Drupal\Core\Queue\QueueInterface $queue */
+  $queue = $queue_factory->get('cron_unl_cas_update_user_data', true);
+  $item = new \stdClass();
+  $item->uid = $account->id();
+  $queue->createItem($item);
+}
