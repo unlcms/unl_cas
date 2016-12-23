@@ -22,7 +22,7 @@ class Helper
    *
    * @return bool|\Drupal\Core\Entity\EntityInterface|object|static
    */
-  public function importUser($username) {
+  public function initializeUser($username) {
     $username = trim($username);
     $user = user_load_by_name($username);
     if (!$user) {
