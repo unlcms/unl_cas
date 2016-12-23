@@ -31,12 +31,11 @@ class Helper
       $user->setEmail($username . '@unl.edu');
       $user->enforceIsNew();
       $user->activate();
+      $user->save();
+
+      //The first time that they log in, try to update userdata
+      $this->updateUserData($user);
     }
-    
-    $user->save();
-    
-    //The first time that they log in, try to update userdata
-    $this->updateUserData($user);
     
     return $user;
   }
