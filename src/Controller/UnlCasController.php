@@ -73,7 +73,7 @@ class UnlCasController extends ControllerBase {
       $helper = new Helper();
       
       $username = $cas->getUsername();
-      $user = $helper->importUser($username);
+      $user = $helper->initializeUser($username);
 
       if (\Drupal::currentUser()->id() != $user->id()) {
         \Drupal::currentUser()->setAccount($user);
