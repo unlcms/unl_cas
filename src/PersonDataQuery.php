@@ -49,6 +49,44 @@ class PersonDataQuery
     //Return the false value
     return $result;
   }
+  
+  public function search($search) {
+    $results = [];
+    
+    try {
+      //TODO: test this, I have no idea if it actually works
+      $client = $this->getClient();
+      
+      $searchFields = array('uid', 'mail', 'cn', 'givenName', 'sn', 'eduPersonNickname');
+      $filter = '(&';
+      foreach (preg_split('/\s+/', $search) as $searchTerm) {
+        $searchTerm = str_replace(array('"', ',', '*'), '', $client->escape($searchTerm));
+        $filter .= '(|';
+        foreach ($searchFields as $searchField) {
+          $filter .= '(' . $searchField . '=*' . $client->escape($searchTerm) . '*)';
+        }
+        $filter .= ')';
+      }
+      $filter .= '(|(ou=people)(ou=guests)))';
+      
+      $results = $client->query('dc=unl,dc=edu', $filter);
+    } catch (\Exception $e) {
+      $results = json_decode(file_get_contents('https://directory.unl.edu/service.php?q='.urlencode($search).'&format=json&method=getLikeMatches'), TRUE);
+    }
+
+    //Clean up data
+    $clean_results = [];
+    foreach ($results as $key => $result) {
+      $result = $this->sanitizeUserRecordData($result);
+
+      if (!empty($result['uid'])) {
+        //Skip any records missing a UID
+        $clean_results[] = $result;
+      }
+    }
+    
+    return $clean_results;
+  }
 
   /**
    * @return Ldap

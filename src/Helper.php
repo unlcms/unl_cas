@@ -20,7 +20,7 @@ class Helper
    *
    * @param $username
    *
-   * @return bool|\Drupal\Core\Entity\EntityInterface|object|static
+   * @return bool|\Drupal\user\Entity\User
    */
   public function initializeUser($username) {
     $username = trim($username);
