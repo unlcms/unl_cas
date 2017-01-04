@@ -52,19 +52,9 @@ class UserImportStepOneForm extends UserImportForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $query = new PersonDataQuery();
-    $results = $query->search($form_state->getValue('search'));
-    
-    if (empty($results)) {
-      //No results could be found, so restart the process
-      drupal_set_message($this->t('No results could be found for: @search', array('@search' => $form_state->getValue('search'))), 'error');
-      $form_state->setRedirect('unl_cas.user_import');
-      
-      return; //exit early
-    }
-    
-    //Results were found, continue to step two
-    $this->store->set('unl_import_data', $results);
+    //note: we could actually fetch the results here, but I'd rather save a query term to the store than a potentially huge result set
+    //continue to step two
+    $this->store->set('unl_import_data', $form_state->getValue('search'));
     $form_state->setRedirect('unl_cas.user_import_step_two');
   }
 
