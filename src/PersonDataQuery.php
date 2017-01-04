@@ -54,23 +54,29 @@ class PersonDataQuery
     $results = [];
     
     try {
-      //TODO: test this, I have no idea if it actually works
       $client = $this->getClient();
       
       $searchFields = array('uid', 'mail', 'cn', 'givenName', 'sn', 'eduPersonNickname');
       $filter = '(&';
+      
       foreach (preg_split('/\s+/', $search) as $searchTerm) {
-        $searchTerm = str_replace(array('"', ',', '*'), '', $client->escape($searchTerm));
+        $searchTerm = $client->escape($searchTerm);
         $filter .= '(|';
         foreach ($searchFields as $searchField) {
-          $filter .= '(' . $searchField . '=*' . $client->escape($searchTerm) . '*)';
+          $filter .= '(' . $searchField . '=*' . $searchTerm . '*)';
         }
         $filter .= ')';
       }
       $filter .= '(|(ou=people)(ou=guests)))';
       
-      $results = $client->query('dc=unl,dc=edu', $filter);
+      $query = $client->query('dc=unl,dc=edu', $filter);
+      $tmp_results = $query->execute();
+      foreach ($tmp_results as $result) {
+        //We want the attributes array
+        $results[] = $result->getAttributes();
+      }
     } catch (\Exception $e) {
+      //There was a problem, fetch with directory instead
       $results = json_decode(file_get_contents('https://directory.unl.edu/service.php?q='.urlencode($search).'&format=json&method=getLikeMatches'), TRUE);
     }
 
