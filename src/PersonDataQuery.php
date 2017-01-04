@@ -73,11 +73,17 @@ class PersonDataQuery
       $tmp_results = $query->execute();
       foreach ($tmp_results as $result) {
         //We want the attributes array
-        $results[] = $result->getAttributes();
+        $result = $result->getAttributes();
+        //Mark the result as LDAP
+        $result['data-source'] = self::SOURCE_LDAP;
+        $results[] = $result;
       }
     } catch (\Exception $e) {
       //There was a problem, fetch with directory instead
       $results = json_decode(file_get_contents('https://directory.unl.edu/service.php?q='.urlencode($search).'&format=json&method=getLikeMatches'), TRUE);
+      foreach($results as $key=>$value) {
+        $results[$key]['data-source'] = self::SOURCE_DIRECTORY;
+      }
     }
 
     //Clean up data
