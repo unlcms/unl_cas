@@ -2,36 +2,9 @@
 
 This module does the following
 * allows users to log in via UNL CAS
-* allows searching and importing users into the system
-* stores UNL information, such as the 'eduPersonAffiliation', to help with access restrictions
 
-## Why LDAP as a source of user information instead of directory.unl.edu?
-LDAP gives us access to users that have their privacy flag set. This is important so that we can add any users to sites regardless of weather or not their privacy flag is set.
+The unl_cas module should ONLY add functionality to force authentication though UNL. Logic for importing users and user data lives in its own module, unl_user. unl_cas depends on unl_user so that it can import user data when a user logs in.
 
-Note that we use directory.unl.edu as a backup source of information in the case that either LDAP is down or the LDAP credentials are not provides/bad.
-
-
-## Getting and setting UNL user data
-UNL Specific user data is retrieved when an account is first created. Every login there-after will trigger an update, but it may not happen right away.
-
-To manually update user data:
-```
-$helper = new Helper();
-$user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
-$helper->updateUserData($user);
-```
-
-To retrieve user data
-```
-/**
-* @var UserDataInterface $userDataService
-*/
-$userDataService = \Drupal::service('user.data');
-
-//Specific field
-$primaryAffiliation = $userDataService->get('unl_cas', \Drupal::currentUser()->id(), 'primaryAffiliation');
-
-//All UNL user data
-$allUserData = $userDataService->get('unl_cas', \Drupal::currentUser()->id());
-
-```
+The reason for the separation is that twofold:
+* testing is impossible if we modify the core login routes (some tests depend on being able to create users and log them in via the cour authentication mechanism)
+* The authentication method for UNL might change (cas vs shib), while the user data importing should remain constant (or at least similar).
