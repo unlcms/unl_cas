@@ -1,27 +1,3 @@
-unl_cas.user_import:
-  path: '/admin/people/import'
-  defaults:
-    _form: '\Drupal\unl_cas\Form\MultiStep\UserImportStepOneForm'
-    _title: 'Import User from UNL Directory'
-  requirements:
-    _permission: 'administer users'
-    
-unl_cas.user_import_step_two:
-  path: '/admin/people/import-step-2'
-  defaults:
-    _form: '\Drupal\unl_cas\Form\MultiStep\UserImportStepTwoForm'
-    _title: 'Import User from UNL Directory'
-  requirements:
-    _permission: 'administer users'
-
-unl_cas.settings:
-  path: '/admin/config/people/unl_cas'
-  defaults:
-    _form: '\Drupal\unl_cas\Form\SettingsForm'
-    _title: 'Configure the UNL CAS module'
-  requirements:
-    _permission: 'administer site configuration'
-
 unl_cas.validate:
   path: '/user/cas'
   defaults:

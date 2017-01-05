@@ -8,8 +8,5 @@
       "homepage": "https://www.drupal.org/u/ericras",
       "role": "Maintainer"
     }
-  ],
-  "require":{
-    "symfony/ldap": "~3.2.1"
-  }
+  ]
 }
