@@ -1,6 +1,0 @@
-unl_cas.admin:
-  title: 'UNL CAS'
-  description: 'Configure the UNL CAS module'
-  parent: user.admin_index
-  route_name: unl_cas.settings
-  weight: 1

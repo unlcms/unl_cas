@@ -5,7 +5,7 @@ namespace Drupal\unl_cas\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Url;
-use Drupal\unl_cas\Helper;
+use Drupal\unl_user\Helper;
 use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
