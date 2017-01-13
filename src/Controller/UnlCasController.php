@@ -91,10 +91,10 @@ class UnlCasController extends ControllerBase {
 
     $destination = drupal_get_destination();
     if (!$destination['destination']) {
-      $destination['destination'] = 'admin';
+      $destination['destination'] = '/admin';
     }
-    
-    //The controller expects a response object or a render array
-    return new RedirectResponse(Url::fromUserInput('/'.$destination['destination'])->toString());
+
+    // The controller expects a response object or a render array.
+    return new RedirectResponse($destination['destination']);
   }
 }
