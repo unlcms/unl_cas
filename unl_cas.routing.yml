@@ -3,5 +3,7 @@ unl_cas.validate:
   defaults:
     _controller: '\Drupal\unl_cas\Controller\UnlCasController::validate'
     _title: 'UNL CAS Validation'
+  options:
+    no_cache: TRUE
   requirements:
     _access: 'TRUE'

@@ -36,6 +36,7 @@ class UnlCasLoader implements EventSubscriberInterface {
     // Redirect the login form to CAS.
     if (\Drupal::service('path.current')->getPath() == '/user/login') {
       $response = new TrustedRedirectResponse($this->cas->getLoginUrl(), 302);
+      $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
       $event->setResponse($response);
       return;
     }
@@ -47,6 +48,7 @@ class UnlCasLoader implements EventSubscriberInterface {
       $this->cas->setGateway();
       \Drupal::request()->query->remove('destination');
       $response = new TrustedRedirectResponse($this->cas->getLoginUrl(), 302);
+      $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
       $event->setResponse($response);
     }
   }
