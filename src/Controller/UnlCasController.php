@@ -30,7 +30,6 @@ class UnlCasController extends ControllerBase {
   public function getAdapter() {
     $this->unl_load_zend_framework();
 
-
     /**
      * @var \Symfony\Component\HttpFoundation\Session\Session $session
      */
@@ -71,7 +70,7 @@ class UnlCasController extends ControllerBase {
 
     if ($auth) {
       $helper = new Helper();
-      
+
       $username = $cas->getUsername();
       $user = $helper->initializeUser($username);
 
@@ -95,6 +94,6 @@ class UnlCasController extends ControllerBase {
     }
 
     // The controller expects a response object or a render array.
-    return new RedirectResponse(Url::fromUserInput('/' . ltrim($destination['destination'], '/'))->toString());
+    return new RedirectResponse(Url::fromUserInput('/' . str_replace(base_path(), '', $destination['destination']))->toString());
   }
 }
