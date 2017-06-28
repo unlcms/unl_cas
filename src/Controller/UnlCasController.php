@@ -94,6 +94,8 @@ class UnlCasController extends ControllerBase {
     }
 
     // The controller expects a response object or a render array.
-    return new RedirectResponse(Url::fromUserInput('/' . ltrim(base_path(), $destination['destination']))->toString());
+    $url_raw = '/' . substr($destination['destination'], strlen(base_path()));
+    $url = Url::fromUserInput($url_raw)->toString();
+    return new RedirectResponse($url);
   }
 }
