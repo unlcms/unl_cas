@@ -51,7 +51,7 @@ class UnlCasController extends ControllerBase {
       } else {
         $url = Url::fromRoute('unl_cas.validate', array(), array('absolute' => TRUE, 'query' => drupal_get_destination()))->toString();
       }
-      $this->adapter = new \Unl_Cas($url, 'https://login.unl.edu/cas');
+      $this->adapter = new \Unl_Cas($url, 'https://shib.unl.edu/idp/profile/cas');
     }
 
     \Drupal::request()->query->remove('destination');
