@@ -76,16 +76,24 @@ class Zend_Cache_Backend
     public function setDirectives($directives)
     {
         if (!is_array($directives)) Zend_Cache::throwException('Directives parameter must be an array');
-        while (list($name, $value) = each($directives)) {
-            if (!is_string($name)) {
-                Zend_Cache::throwException("Incorrect option name : $name");
-            }
+          // Core hack to fix notice: Deprecated functionality: The each() function is deprecated. This message will be suppressed on further calls  in /mnt/www//lib/Zend/Cache/Backend.php on line 79
+          foreach($directives as $name => $value) {
+              if (!is_string($name)) {
+                  Zend_Cache::throwException("Incorrect option name : $name");
+              }
             $name = strtolower($name);
             if (array_key_exists($name, $this->_directives)) {
                 $this->_directives[$name] = $value;
             }
-
         }
+/*
+         while (list($name, $value) = each($directives)) {
+             if (!is_string($name)) {
+                 Zend_Cache::throwException("Incorrect option name : $name");
+             }
+ 
+         }
+*/
 
         $this->_loggerSanity();
     }
