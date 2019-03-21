@@ -10,6 +10,6 @@
     }
   ],
   "require": {
-    "unlcms/unl_user": "*"
+    "unlcms/unl_user": "dev-develop"
   }
 }
