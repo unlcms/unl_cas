@@ -8,8 +8,5 @@
       "homepage": "https://www.drupal.org/u/ericras",
       "role": "Maintainer"
     }
-  ],
-  "require": {
-    "unlcms/unl_user": "dev-8.x-1.x"
-  }
+  ]
 }
