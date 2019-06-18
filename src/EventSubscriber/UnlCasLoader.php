@@ -35,8 +35,8 @@ class UnlCasLoader implements EventSubscriberInterface {
 
     // Redirect the login form to CAS.
     if (\Drupal::service('path.current')->getPath() == '/user/login') {
-      // If login page is being accessed by tests, then don't redirect.
-      if (isset($_ENV['SIMPLETEST_BASE_URL'])) {
+      // Allow redirect to be bypassed with environment variable.
+      if (isset($_ENV['UNLCAS_BYPASS_LOGIN_REDIRECT'])) {
         return;
       }
       $response = new TrustedRedirectResponse($this->cas->getLoginUrl(), 302);
