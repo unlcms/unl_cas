@@ -35,6 +35,10 @@ class UnlCasLoader implements EventSubscriberInterface {
 
     // Redirect the login form to CAS.
     if (\Drupal::service('path.current')->getPath() == '/user/login') {
+      // Allow redirect to be bypassed with environment variable.
+      if (isset($_ENV['UNLCAS_BYPASS_LOGIN_REDIRECT'])) {
+        return;
+      }
       $response = new TrustedRedirectResponse($this->cas->getLoginUrl(), 302);
       $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
       $event->setResponse($response);
