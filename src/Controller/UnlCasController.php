@@ -13,29 +13,12 @@ class UnlCasController extends ControllerBase {
 
   public $adapter;
 
-  static $zendLoaded = FALSE;
-
-  public function unl_load_zend_framework() {
-    if (UnlCasController::$zendLoaded) {
-      return;
-    }
-
-    set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/../../libraries');
-    require_once 'Zend/Loader/Autoloader.php';
-    $autoloader = \Zend_Loader_Autoloader::getInstance();
-    $autoloader->registerNamespace('Unl_');
-    UnlCasController::$zendLoaded = TRUE;
-  }
-
   public function getAdapter() {
-    $this->unl_load_zend_framework();
-
     /**
      * @var \Symfony\Component\HttpFoundation\Session\Session $session
      */
     $session = \Drupal::service('session');
 
-    // Start the session because if drupal doesn't then Zend_Session will.
     if (!$session->isStarted()) {
       /**
        * Drupal will start a 'lazy' session for anonymous users so that a cookie is not set (to help with things like varnish)
@@ -51,7 +34,10 @@ class UnlCasController extends ControllerBase {
       } else {
         $url = Url::fromRoute('unl_cas.validate', array(), array('absolute' => TRUE, 'query' => drupal_get_destination()))->toString();
       }
-      $this->adapter = new \Unl_Cas($url, 'https://shib.unl.edu/idp/profile/cas');
+      $options = array('hostname' => 'shib.unl.edu', 'port' => 443, 'uri' => 'idp/profile/cas');
+      $protocol = new \SimpleCAS_Protocol_Version2($options);
+      $this->adapter = \SimpleCAS::client($protocol);
+      $this->adapter->setURL($url);
     }
 
     \Drupal::request()->query->remove('destination');
@@ -63,15 +49,13 @@ class UnlCasController extends ControllerBase {
     $cas = $this->getAdapter();
 
     if (array_key_exists('logoutRequest', $_POST)) {
-      $cas->handleLogoutRequest($_POST['logoutRequest']);
+      $cas->handleSingleLogOut();
     }
 
-    $auth = $cas->validateTicket();
+    $username = $cas->getProtocol()->validateTicket($cas->getTicket(), $cas->getURL());
 
-    if ($auth) {
+    if ($username) {
       $helper = new Helper();
-
-      $username = $cas->getUsername();
       $user = $helper->initializeUser($username);
 
       if (\Drupal::currentUser()->id() != $user->id()) {

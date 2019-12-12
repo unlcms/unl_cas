@@ -1,7 +1,5 @@
 <?php
 
-use Drupal\Core\Routing\TrustedRedirectResponse;
-
 /**
  * Implements hook_install().
  */
@@ -30,9 +28,5 @@ function unl_cas_user_login(\Drupal\Core\Session\AccountInterface $account) {
  */
 function unl_cas_user_logout($account) {
   $cas = (new \Drupal\unl_cas\Controller\UnlCasController())->getAdapter();
-  $url = $cas->getLogoutUrl(\Drupal::url('<front>', [], ['absolute' => TRUE]));
-  $response = new TrustedRedirectResponse($url, 302);
-  $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
-  $response->send();
-  return;
+  $cas->logout(\Drupal::url('<front>', [], ['absolute' => TRUE]));
 }

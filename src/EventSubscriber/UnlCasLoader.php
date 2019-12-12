@@ -3,7 +3,6 @@
 namespace Drupal\unl_cas\EventSubscriber;
 
 use Drupal\unl_cas\Controller\UnlCasController;
-use Drupal\Core\Routing\TrustedRedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -39,7 +38,7 @@ class UnlCasLoader implements EventSubscriberInterface {
       if (isset($_ENV['UNLCAS_BYPASS_LOGIN_REDIRECT'])) {
         return;
       }
-      $response = new TrustedRedirectResponse($this->cas->getLoginUrl(), 302);
+      $response = $this->cas->forceAuthentication();
       $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
       $event->setResponse($response);
       return;
@@ -48,10 +47,11 @@ class UnlCasLoader implements EventSubscriberInterface {
     // If the user's CAS service ticket is expired, and their drupal session hasn't,
     // redirect their next GET request to CAS to keep their CAS session active.
     // However, if their drupal session expired (and they're now anonymous), redirect them regardless.
-    if ($this->cas->isTicketExpired() && ($_SERVER['REQUEST_METHOD'] == 'GET' || \Drupal::currentUser()->isAnonymous())) {
-      $this->cas->setGateway();
+    $isTicketExpired = $this->cas->getProtocol()->validateTicket($this->cas->getTicket(), $this->cas->getURL());
+    if ($isTicketExpired && ($_SERVER['REQUEST_METHOD'] == 'GET' || \Drupal::currentUser()->isAnonymous())) {
+      $this->cas->getProtocol()->gateway = TRUE;
       \Drupal::request()->query->remove('destination');
-      $response = new TrustedRedirectResponse($this->cas->getLoginUrl(), 302);
+      $response = $this->cas->forceAuthentication();
       $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
       $event->setResponse($response);
     }

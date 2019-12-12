@@ -9,7 +9,19 @@
       "role": "Maintainer"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/saltybeagle/SimpleCAS.git"
+    },
+    {
+      "type": "pear",
+      "url": "https://pear.php.net"
+    }
+  ],
   "require": {
-    "unlcms/unl_user": "dev-8.x-1.x"
+    "unlcms/unl_user": "dev-8.x-1.x",
+    "pear-pear/http_request2": "*",
+    "simple-cas/simple-cas": "dev-master"
   }
 }
