@@ -1,5 +1,6 @@
 services:
   unL_cas_loader:
     class: '\Drupal\unl_cas\EventSubscriber\UnlCasLoader'
+    arguments: ['@current_route_match']
     tags:
       - { name: event_subscriber }
