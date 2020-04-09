@@ -1,13 +1,15 @@
 <?php
 
 use Drupal\Core\Routing\TrustedRedirectResponse;
+use Drupal\Core\Url;
+use Drupal\user\UserInterface;
 
 /**
  * Implements hook_install().
  */
 function unl_cas_install() {
   \Drupal::configFactory()->getEditable('user.settings')
-      ->set('register', USER_REGISTER_ADMINISTRATORS_ONLY)
+      ->set('register', UserInterface::REGISTER_ADMINISTRATORS_ONLY)
       ->save(TRUE);
 }
 
@@ -29,8 +31,10 @@ function unl_cas_user_login(\Drupal\Core\Session\AccountInterface $account) {
  * Implements hook_user_logout().
  */
 function unl_cas_user_logout($account) {
-  $cas = (new \Drupal\unl_cas\Controller\UnlCasController())->getAdapter();
-  $url = $cas->getLogoutUrl(\Drupal::url('<front>', [], ['absolute' => TRUE]));
+  $unl_cas_loader = \Drupal::service('unl_cas.adapter');
+  $cas = $unl_cas_loader->getAdapter();
+  $url = $cas->getLogoutUrl(Url::fromRoute('<front>', [], ['absolute' => TRUE]));
+
   $response = new TrustedRedirectResponse($url, 302);
   $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
   $response->send();

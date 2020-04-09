@@ -2,9 +2,9 @@
 
 namespace Drupal\unl_cas\EventSubscriber;
 
-use Drupal\unl_cas\Controller\UnlCasController;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
+use Drupal\unl_cas\UnlCasAdapter;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -17,6 +17,13 @@ class UnlCasLoader implements EventSubscriberInterface {
   protected $cas;
 
   /**
+   * A UNL CAS adapter.
+   *
+   * @var \Drupal\unl_cas\UnlCasAdapter
+   */
+  protected $unlCasAdapter;
+
+  /**
    * The currently active route match object.
    *
    * @var \Drupal\Core\Routing\RouteMatchInterface
@@ -24,11 +31,15 @@ class UnlCasLoader implements EventSubscriberInterface {
   protected $currentRouteMatch;
 
   /**
-   * Constructs a new UnlCasLoader.
+   * Constructs a new UnlCasLoader object.
    *
+   * @param \Drupal\unl_cas\UnlCasAdapter $unl_cas_adapter
+   *   A UNL CAS adapter.
    * @param \Drupal\Core\Routing\RouteMatchInterface $current_route_match
+   *   The currently active route match object.
    */
-  public function __construct(RouteMatchInterface $current_route_match) {
+  public function __construct(UnlCasAdapter $unl_cas_adapter, RouteMatchInterface $current_route_match) {
+    $this->unlCasAdapter = $unl_cas_adapter;
     $this->currentRouteMatch = $current_route_match;
   }
 
@@ -48,7 +59,7 @@ class UnlCasLoader implements EventSubscriberInterface {
       return;
     }
 
-    $this->cas = (new UnlCasController())->getAdapter();
+    $this->cas = $this->unlCasAdapter->getAdapter();
 
     // Redirect the login form to CAS.
     if ($this->currentRouteMatch->getRouteName() == 'user.login') {

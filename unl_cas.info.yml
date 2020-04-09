@@ -3,7 +3,7 @@ description: 'Enables CAS authentication/registration of users through login.unl
 package: UNL
 
 type: module
-core: 8.x
+core_version_requirement: ^8 || ^9
 
 version: 1.x
 
