@@ -1,6 +1,9 @@
 services:
+  unl_cas.adapter:
+    class: '\Drupal\unl_cas\UnlCasAdapter'
+    arguments: ['@redirect.destination']
   unL_cas_loader:
     class: '\Drupal\unl_cas\EventSubscriber\UnlCasLoader'
-    arguments: ['@current_route_match']
+    arguments: ['@unl_cas.adapter', '@current_route_match']
     tags:
       - { name: event_subscriber }
