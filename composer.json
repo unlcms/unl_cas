@@ -11,6 +11,6 @@
   ],
   "require": {
     "drupal/core": "^8 || ^9",
-    "unlcms/unl_user": "dev-8.x-1.x"
+    "unlcms/unl_user": "^1.0"
   }
 }
