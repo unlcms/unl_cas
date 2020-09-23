@@ -33,7 +33,7 @@ function unl_cas_user_login(\Drupal\Core\Session\AccountInterface $account) {
 function unl_cas_user_logout($account) {
   $unl_cas_loader = \Drupal::service('unl_cas.adapter');
   $cas = $unl_cas_loader->getAdapter();
-  $url = $cas->getLogoutUrl(Url::fromRoute('<front>', [], ['absolute' => TRUE]));
+  $url = $cas->getLogoutUrl(Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString());
 
   $response = new TrustedRedirectResponse($url, 302);
   $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
