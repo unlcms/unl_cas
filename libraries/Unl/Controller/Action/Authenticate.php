@@ -47,14 +47,18 @@ abstract class Unl_Controller_Action_Authenticate extends Unl_Controller_Action
     {
         $this->_destroyUser(Zend_Auth::getInstance()->getIdentity());
         Zend_Auth::getInstance()->clearIdentity();
-        
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-            $returnUrl = 'https://';
+
+        $baseUrl = Zend_Controller_Front::getInstance()->getBaseUrl();
+        if (parse_url($baseUrl, PHP_URL_SCHEME)) {
+            $returnUrl = $baseUrl;
         } else {
-            $returnUrl = 'http://';
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+                $returnUrl = 'https://';
+            } else {
+                $returnUrl = 'http://';
+            }
+            $returnUrl .= $_SERVER['SERVER_NAME'] . $baseUrl;
         }
-        
-        $returnUrl .= $_SERVER['SERVER_NAME'] . Zend_Controller_Front::getInstance()->getBaseUrl();
         
         $logoutUrl = $this->_getCasAdapter()->getLogoutUrl($returnUrl);
         $this->_redirect($logoutUrl);
@@ -126,18 +130,24 @@ abstract class Unl_Controller_Action_Authenticate extends Unl_Controller_Action
         static $adapter = NULL;
         
         if (!$adapter) {
-            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-                $serviceUrl = 'https://';
-            } else {
-                $serviceUrl = 'http://';
-            }
             $path = Zend_Controller_Front::getInstance()->getRouter()->assemble(array(
                 'module' => $this->getRequest()->getModuleName(),
                 'controller' => $this->getRequest()->getControllerName(),
                 'action' => 'cas'
             ));
-            $serviceUrl .= $_SERVER['SERVER_NAME'] . $path;
-            $adapter = new Unl_Cas($serviceUrl, 'https://login.unl.edu/cas');
+
+            if (parse_url($path, PHP_URL_SCHEME)) {
+                $serviceUrl = $path;
+            } else {
+                if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+                    $serviceUrl = 'https://';
+                } else {
+                    $serviceUrl = 'http://';
+                }
+                $serviceUrl .= $_SERVER['SERVER_NAME'] . $path;
+            }
+
+            $adapter = new Unl_Cas($serviceUrl, 'https://shib.unl.edu/idp/profile/cas');
         }
         
         return $adapter;

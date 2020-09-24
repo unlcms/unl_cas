@@ -63,20 +63,25 @@ class Unl_Controller_Plugin_Auth_Cas extends Zend_Controller_Plugin_Abstract
         }
         
         // Build the cas service URL.
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-            $serviceUrl = 'https://';
-        } else {
-            $serviceUrl = 'http://';
-        }
         $casPath = Zend_Controller_Front::getInstance()->getRouter()->assemble(array(
             'module' => $casModule,
             'controller' => $casController,
             'action' => $casAction,
         ));
-        $serviceUrl .= $_SERVER['SERVER_NAME'] . $casPath;
+
+        if (parse_url($path, PHP_URL_SCHEME)) {
+            $serviceUrl = $casPath;
+        } else {
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+                $serviceUrl = 'https://';
+            } else {
+                $serviceUrl = 'http://';
+            }
+            $serviceUrl .= $_SERVER['SERVER_NAME'] . $casPath;
+        }
         
         // Init the CAS Adapter.
-        $casAdapter = new Unl_Cas($serviceUrl, 'https://login.unl.edu/cas');
+        $casAdapter = new Unl_Cas($serviceUrl, 'https://shib.unl.edu/idp/profile/cas');
         
         // If either the user has no ticket, the ticket is expired, or a user isn't logged in, go ahead with transparent login.
         if ($casAdapter->isTicketExpired() || !Zend_Auth::getInstance()->hasIdentity()) {

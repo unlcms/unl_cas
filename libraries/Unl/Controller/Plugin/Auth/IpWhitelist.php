@@ -8,8 +8,9 @@
  * 
  * and the optional configuration lines:
  * unl.ipWhitelist.table = <name of the database table that contains the whitelist>
- * unl.ipWhitelist.column.ipAddress = <name of the column that contains the IP address>
- * unl.ipWhitelist.column.username = <name of the column that contains the username>
+ * unl.ipWhitelist.columns.ipAddress = <name of the column that contains the IP address>
+ * unl.ipWhitelist.columns.username = <name of the column that contains the username>
+ * unl.ipWhitelist.trustedProxies = <array of IP addresses to trust when an X_FORWARDED_FOR header exists>
  *
  * @author tsteiner
  *
@@ -31,6 +32,7 @@ class Unl_Controller_Plugin_Auth_IpWhitelist extends Zend_Controller_Plugin_Abst
         $table           = isset($options['table']) ? $options['table'] : 'ip_whitelist';
         $ipAddressColumn = isset($options['columns']['ipAddress']) ? $options['columns']['ipAddress'] : 'ip_address';
         $usernameColumn  = isset($options['columns']['username']) ? $options['columns']['username'] : 'username';
+        $trustedProxies  = isset($options['trustedProxies']) && is_array($options['trustedProxies']) ? $options['trustedProxies'] : array();
         
         // Not configured.  Don't do anything.
         if (!$db instanceof Zend_Db_Adapter_Abstract) {
@@ -47,6 +49,8 @@ class Unl_Controller_Plugin_Auth_IpWhitelist extends Zend_Controller_Plugin_Abst
         foreach ($whitelistData as $row) {
             $whitelistAdapter->addToWhitelist($row[$ipAddressColumn], $row[$usernameColumn]);
         }
+
+        $whitelistAdapter->setTrustedProxyAddresses($trustedProxies);
         
         // Attempt authentication.
         Zend_Auth::getInstance()->authenticate($whitelistAdapter);
