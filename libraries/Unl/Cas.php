@@ -41,8 +41,9 @@ class Unl_Cas
     const PARAM_RENEW   = 3;
     
     /**
-     * Session storage use to prevent infinate redirect loops when in gateway mode.
-     * @var Zend_Session_Namespace
+     * Session storage use to prevent infinite redirect loops when in gateway mode.
+     * Do not use this directly, use $this->_session()
+     * @var Zend_Session_Namespace|array
      */
     private $_session;
     
@@ -75,42 +76,21 @@ class Unl_Cas
             $this->_session = new Zend_Session_Namespace(__CLASS__);
         } catch (Zend_Session_Exception $e) {
         	//Problem starting Zend_Session (probably because it was already started, use standard PHP sessions.
-        	if (!array_key_exists(__CLASS__, $_SESSION) || !$_SESSION[__CLASS__] instanceof ArrayObject) {
-                $_SESSION[__CLASS__] = new ArrayObject();
+            if (!array_key_exists(__CLASS__, $_SESSION) || !is_array($_SESSION[__CLASS__])) {
+                $_SESSION[__CLASS__] = array();
         	}
-        	$this->_session = $_SESSION[__CLASS__];
-        }
-        if (!isset($this->_session->ticket)) {
-            $this->_session->ticket = NULL;
+            $this->_session = NULL;
         }
     }
     
     /**
      * Set the service url
-     * 
-     * This function appends all get variables but strips out the ticket
-     * The ticket parameter is appended by the CAS server, if it is left
-     * in the service URL will be different from the one sent to the CAS
-     * server. Because of this, authentication will fail.
      *
      * @param string $serviceUrl
      */
     public function setServiceUrl($serviceUrl)
     {
-        $params = array();
-        $paramString = "";
-        if (sizeof($_GET) > 0) {
-            foreach ($_GET as $key => $value) {
-                if ($key != "ticket") {
-                    $params[] = $key . ($value != "" ? "=" . $value : "");
-                }
-            }
-            if(sizeof($params) > 0){
-                $paramString = "?" . implode("&", $params);
-            }
-        }
-        $paramString = '';
-        $this->_serviceUrl = $serviceUrl . $paramString;
+        $this->_serviceUrl = $serviceUrl;
     }
     
     /**
@@ -160,7 +140,7 @@ class Unl_Cas
      */
     public function getUsername()
     {
-        return $this->_username;
+        return $this->_session('username');
     }
     
     /**
@@ -290,8 +270,7 @@ class Unl_Cas
         $response = $client->request();
         if ($response->isSuccessful() && $this->_parseResponse($response->getBody())) {
             $this->_addValidTicket($ticket);
-            $this->_session->ticket = $ticket;
-            $this->_session->username = $this->getUsername();
+            $this->_session('ticket', $ticket);
             return true;
         }
         return false;
@@ -309,7 +288,7 @@ class Unl_Cas
         if ($xml->loadXML($response)) {
             if ($success = $xml->getElementsByTagName('authenticationSuccess')) {
                 if ($success->length > 0 && $uid = $success->item(0)->getElementsByTagName('user')) {
-                    $this->_username = $uid->item(0)->nodeValue;
+                    $this->_session('username', $uid->item(0)->nodeValue);
                     return true;
                 }
             }
@@ -324,7 +303,6 @@ class Unl_Cas
     
     private function _removeValidTicket($ticket)
     {
-        echo 'Removing ticket ' . $ticket . PHP_EOL;
         $this->_getTicketCache()->remove(hash('sha512', $ticket));
     }
     
@@ -338,14 +316,15 @@ class Unl_Cas
         if (!$this->_ticketCache) {
             $cache_dir = session_save_path();
             if (!$cache_dir) {
-                $cache_dir = '/tmp';
+                $cache_dir = sys_get_temp_dir();
             }
             $frontendOptions = array(
                 'lifetime' => 60*60,
                 'automatic_serialization' => TRUE
             );
             $backendOptions = array(
-                'cache_dir' => $cache_dir
+                'cache_dir' => $cache_dir,
+                'file_locking' => FALSE
             );
             $this->_ticketCache = Zend_Cache::factory('Core', 'File', $frontendOptions, $backendOptions);
         }
@@ -364,7 +343,7 @@ class Unl_Cas
     
     public function isTicketExpired()
     {
-        return !$this->_isStillValidTicket($this->_session->ticket);
+        return !$this->_isStillValidTicket($this->_session('ticket'));
     }
     
     public function handleLogoutRequest($saml)
@@ -380,6 +359,34 @@ class Unl_Cas
         $ticket = $ticketNodes->item(0)->textContent;
         $this->_removeValidTicket($ticket);
         exit;
+    }
+    
+    public function destroySession()
+    {
+        $this->_removeValidTicket($this->_session('ticket'));
+        $this->_session('ticket', NULL);
+        $this->_session('username', NULL);
+    }
+
+    // Wrapper to use either Zend sessions or native PHP sessions
+    protected function _session($key, $val = NULL)
+    {
+        if ($this->_session instanceof Zend_Session_Namespace) {
+            if (func_num_args() == 2) {
+                $this->_session->$key = $val;
+            } else {
+                return $this->_session->$key;
+            }
+        } else {
+            if (func_num_args() == 2) {
+                $_SESSION[__CLASS__][$key] = $val;
+            } else {
+                if (!isset($_SESSION[__CLASS__][$key])) {
+                    return NULL;
+                }
+                return $_SESSION[__CLASS__][$key];
+            }
+        }
     }
 }
 

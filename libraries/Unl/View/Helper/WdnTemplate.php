@@ -50,17 +50,21 @@ class Unl_View_Helper_WdnTemplate extends Zend_View_Helper_Abstract
         $this->view->headLink(array('rel' => 'home',
                                     'href' => $staticBaseUrl,
                                     'title' => $layout->siteTitle));
-        
+
+        if (!is_array($layout->bodyClasses)) {
+            $layout->bodyClasses = array();
+        }
+
         require_once 'UNL/Templates.php';
         require_once 'UNL/Templates/CachingService/Null.php';
         UNL_Templates::setCachingService(new UNL_Templates_CachingService_Null());
         UNL_Templates::$options['version'] = UNL_Templates::VERSION3x1;
-        
+
         $config = Unl_Application::getOptions();
         if (isset($config['unl']['templates']['options']) && is_array($config['unl']['templates']['options'])) {
             UNL_Templates::$options = array_merge(UNL_Templates::$options, $config['unl']['templates']['options']);
         }
-
+        
         if (!$layout->template) {
             if (UNL_Templates::$options['version'] == UNL_Templates::VERSION3x1) {
                 $layout->template = 'Local';
@@ -86,6 +90,7 @@ class Unl_View_Helper_WdnTemplate extends Zend_View_Helper_Abstract
         			     . "\n" . $this->view->headScript()->__toString()
         			     . "\n" . $this->view->headStyle()->__toString()
         			     . '<script type="text/javascript">'
+        			     . "WDN.jQuery('html').data('baseUrl', '" . $this->view->baseUrl() . "');"
         			     . "WDN.jQuery(function() {WDN.jQuery('body').data('baseUrl', '" . $this->view->baseUrl() . "');});"
         			     . '</script>';
         $template->loadSharedCodeFiles();
@@ -164,7 +169,11 @@ _gaq.push(['_trackPageview']);
 EOF;
         }
         $template->footercontent .= '</script>' . PHP_EOL;
-        
+
+        foreach ($layout->bodyClasses as $bodyClass) {
+            $template->__params['class']['value'] .= " $bodyClass";
+        }
+
         $html = $template->toHtml();
         return $html;
 	}

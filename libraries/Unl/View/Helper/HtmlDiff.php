@@ -21,10 +21,10 @@ class Unl_View_Helper_HtmlDiff extends Zend_View_Helper_Abstract
         $to =   strtr($to,   array('<' => ' <', '>' => '> '));
 	    
         // Now the real work.
-        
+
+        Zend_Loader_Autoloader::getInstance()->registerNamespace('Horde_');
         if (!self::$_diffRenderer) {
-            require_once 'Text/Diff/Renderer/inline.php';
-            self::$_diffRenderer = new Text_Diff_Renderer_inline();
+            self::$_diffRenderer = new Horde_Text_Diff_Renderer_Inline();
         }
 
         $currentArray = array();
@@ -37,8 +37,7 @@ class Unl_View_Helper_HtmlDiff extends Zend_View_Helper_Abstract
             $proposedArray[] = $tok;
         }
 
-        require_once 'Text/Diff.php';
-        $diff = new Text_Diff('auto', array($currentArray, $proposedArray));
+        $diff = new Horde_Text_Diff('auto', array($currentArray, $proposedArray));
         $diffHtml = ($diff->isEmpty() ? $from : self::$_diffRenderer->render($diff));
 
         // Undo the filtering.
