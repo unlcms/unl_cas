@@ -54,6 +54,16 @@ class UnlCasLoader implements EventSubscriberInterface {
       return;
     }
 
+    // Support for the key_auth module. If an API key is present then the account and
+    // permissions associated with that user takes precedence over a logged-in CAS user.
+    if (\Drupal::hasService('key_auth.authentication.key_auth')) {
+      /** @var \Drupal\Core\Authentication\AuthenticationProviderInterface */
+      $key_auth = \Drupal::service('key_auth.authentication.key_auth');
+      if ($key_auth->applies($event->getRequest())) {
+        return;
+      }
+    }
+
     // The current request is to the validation URL, we don't want to redirect while a login is pending.
     if ($this->currentRouteMatch->getRouteName() == 'unl_cas.validate') {
       return;
