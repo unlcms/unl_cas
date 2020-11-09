@@ -1,0 +1,7 @@
+unl_cas.settings:
+  type: config_object
+  label: 'UNL CAS settings'
+  mapping:
+    cas_server_url:
+      type: string
+      label: 'CAS Server URL'
