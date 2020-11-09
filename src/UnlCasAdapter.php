@@ -87,7 +87,8 @@ class UnlCasAdapter {
       } else {
         $url = Url::fromRoute('unl_cas.validate', array(), array('absolute' => TRUE, 'query' => $this->redirectDestination->getAsArray()))->toString();
       }
-      $this->adapter = new \Unl_Cas($url, 'https://shib.unl.edu/idp/profile/cas');
+      $cas_server_url = \Drupal::config('unl_cas.settings')->get('cas_server_url');
+      $this->adapter = new \Unl_Cas($url, $cas_server_url);
     }
 
     \Drupal::request()->query->remove('destination');

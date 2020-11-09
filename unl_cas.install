@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Provides install, uninstall, and update functions.
+ */
+
+/**
+ * Set the cas_server_url.
+ */
+function unl_cas_update_8101() {
+  \Drupal::configFactory()
+    ->getEditable('unl_cas.settings')
+    ->set('cas_server_url', 'https://shib.unl.edu/idp/profile/cas')
+    ->save();
+}
