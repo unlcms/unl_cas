@@ -1,6 +1,6 @@
 {
   "name": "unlcms/unl_cas",
-  "description": "login.unl.edu integration",
+  "description": "CAS integration for UNL",
   "type": "drupal-module",
   "authors": [
     {
@@ -11,6 +11,5 @@
   ],
   "require": {
     "drupal/core": "^8 || ^9",
-    "unlcms/unl_user": "^1.0"
   }
 }
