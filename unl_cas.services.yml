@@ -1,9 +1,5 @@
 services:
-  unl_cas.adapter:
-    class: '\Drupal\unl_cas\UnlCasAdapter'
-    arguments: ['@redirect.destination']
-  unL_cas_loader:
-    class: '\Drupal\unl_cas\EventSubscriber\UnlCasLoader'
-    arguments: ['@unl_cas.adapter', '@current_route_match']
+  unl_cas.route_subscriber:
+    class: Drupal\unl_cas\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber }
