@@ -17,9 +17,12 @@ class RouteSubscriber extends RouteSubscriberBase {
     // Force the standard login form to go to CAS.
     // This eliminates the /user/login path and redirects the /user path
     // to /caslogin for an unauthenticated user.
-    if ($route = $collection->get('user.login')) {
-      $route->setPath('caslogin');
-    }
+    // Allow redirect to be bypassed with environment variable.
+    if (!isset($_ENV['UNLCAS_BYPASS_LOGIN_REDIRECT'])) {
+      if ($route = $collection->get('user.login')) {
+        $route->setPath('caslogin');
+      }
+    }  
     // Always deny access to '/admin/people/create'.
     if ($route = $collection->get('user.admin_create')) {
       $route->setRequirement('_access', 'FALSE');
