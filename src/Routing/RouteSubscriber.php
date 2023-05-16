@@ -14,6 +14,12 @@ class RouteSubscriber extends RouteSubscriberBase {
    * {@inheritdoc}
    */
   protected function alterRoutes(RouteCollection $collection) {
+    // Force the standard login form to go to CAS.
+    // This eliminates the /user/login path and redirects the /user path
+    // to /caslogin for an unauthenticated user.
+    if ($route = $collection->get('user.login')) {
+      $route->setPath('caslogin');
+    }
     // Always deny access to '/admin/people/create'.
     if ($route = $collection->get('user.admin_create')) {
       $route->setRequirement('_access', 'FALSE');
