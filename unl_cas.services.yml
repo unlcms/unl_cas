@@ -1,4 +1,9 @@
 services:
+  unl_cas.event_subscriber:
+    class: Drupal\unl_cas\EventSubscriber\UnlCasSubscriber
+    arguments: ['@current_user']
+    tags:
+      - { name: event_subscriber }
   unl_cas.route_subscriber:
     class: Drupal\unl_cas\Routing\RouteSubscriber
     tags:
