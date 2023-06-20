@@ -1,9 +1,9 @@
 services:
-  unl_cas.event_subscriber:
-    class: Drupal\unl_cas\EventSubscriber\UnlCasSubscriber
-    arguments: ['@current_user']
+  unl_cas.http_middleware:
+    class: Drupal\unl_cas\StackMiddleware\CookieCheck
+    arguments: []
     tags:
-      - { name: event_subscriber }
+      - { name: http_middleware, priority: 280, responder: true }
   unl_cas.route_subscriber:
     class: Drupal\unl_cas\Routing\RouteSubscriber
     tags:
