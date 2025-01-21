@@ -48,9 +48,14 @@ class CookieCheck implements HttpKernelInterface {
     // If:
     //   1) a cas path is NOT being requested,
     //   2) there is NOT a user session,
-    //   3) and there IS a unl_sso cookie present that was set by shib.unl.edu on another site,
+    //   3) there IS a unl_sso cookie present that was set by shib.unl.edu on another site,
+    //   4) and domain is not a high-traffic domain (@TODO turn this into a setting),
     // then attempt to log in.
-    if (!str_starts_with($request->getPathInfo(), '/cas') && !$session && $request->cookies->get('unl_sso')) {
+    if (!str_starts_with($request->getPathInfo(), '/cas')
+      && !$session
+      && $request->cookies->get('unl_sso')
+      && !in_array($request->getHost(), ['www.unl.edu', 'its.unl.edu'])
+    ) {
       // Have ot manually construct the login URL rather than use Drupal's
       // Url object because not everything it uses is available yet.
       $login_url = $request->getBasePath() . '/cas?destination=' . urlencode($request->getRequestUri());
