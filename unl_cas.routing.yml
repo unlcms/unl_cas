@@ -1,0 +1,7 @@
+unl_cas.settings:
+  path: '/admin/config/people/cas/unl-cas'
+  defaults:
+    _form: '\Drupal\unl_cas\Form\UnlCasSettingsForm'
+    _title: 'UNL CAS Settings'
+  requirements:
+    _permission: 'administer site configuration'

@@ -1,0 +1,5 @@
+unl_cas.settings_tab:
+  route_name: unl_cas.settings
+  title: 'UNL CAS'
+  base_route: cas.settings
+  weight: 100
